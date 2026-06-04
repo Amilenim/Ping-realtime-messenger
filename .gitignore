@@ -295,6 +295,8 @@ ServiceFabricBackup/
 *.mdf
 *.ldf
 *.ndf
+*.sqlite
+*.db
 
 # Business Intelligence projects
 *.rdl.data
@@ -427,3 +429,12 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+appsettings.Development.json
+appsettings.Local.json
+
+EFSQLScripts/
+.mac/
+
+**/wwwroot/uploads/*
+!**/wwwroot/uploads/.keep
