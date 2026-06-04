@@ -1,0 +1,77 @@
+﻿@model Ping.Models.RegisterViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Реєстрація - Ping</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intl-tel-input@21.0.7/build/css/intlTelInput.css">
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+
+    <div class="px-3 w-100 d-flex justify-content-center">
+        <div class="auth-card">
+            <h2 class="text-center auth-title">Реєстрація</h2>
+
+            <form method="post" id="registerForm">
+                <div class="auth-form-group mb-3">
+                    <label asp-for="Username">Ім'я</label>
+                    <input asp-for="Username" class="form-control auth-input" required placeholder="Придумайте ім'я" />
+                    <span asp-validation-for="Username" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="auth-form-group mb-3">
+                    <label asp-for="Name">Повне ім'я</label>
+                    <input asp-for="Name" class="form-control auth-input" required placeholder="Як вас звуть?" />
+                    <span asp-validation-for="Name" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="auth-form-group mb-3">
+                    <label asp-for="PhoneNumber">Номер телефону</label>
+                    <input asp-for="PhoneNumber" id="registerPhone" type="tel" class="form-control auth-input" required autocomplete="off" />
+                    <span asp-validation-for="PhoneNumber" class="text-danger small mt-1 d-block"></span>
+                    <div id="phoneJsError" class="phone-error">Невірний формат номера</div>
+                </div>
+
+                <div class="auth-form-group mb-3">
+                    <label asp-for="Password">Пароль</label>
+                    <input asp-for="Password" type="password" class="form-control auth-input" required placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="auth-form-group mb-4">
+                    <label asp-for="ConfirmPassword">Підтвердіть пароль</label>
+                    <input asp-for="ConfirmPassword" type="password" class="form-control auth-input" placeholder="••••••••" required />
+                    <span asp-validation-for="ConfirmPassword" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <button type="submit" class="btn btn-neon-purple w-100 shadow-sm">Зареєструватися</button>
+            </form>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="auth-alert mt-4">
+                    <strong class="d-block mb-1">Помилка!</strong>
+                    <div>Перевірте введені дані.</div>
+                    <div asp-validation-summary="ModelOnly" class="small mt-2"></div>
+                </div>
+            }
+
+            <div class="mt-4 text-center">
+                <a asp-action="Login" class="auth-link">Вже є акаунт? Увійти</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@21.0.7/build/js/intlTelInput.min.js"></script>
+    <script src="~/js/phone-input.js" asp-append-version="true"></script>
+</body>
+</html>

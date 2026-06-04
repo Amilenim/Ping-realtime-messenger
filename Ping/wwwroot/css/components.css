@@ -1,0 +1,362 @@
+/* ==========================================================================
+   BOOTSTRAP DARK OVERRIDES
+   ========================================================================== */
+.bg-white     { background-color: var(--bg-surface) !important; }
+.text-dark    { color: var(--text-base) !important; }
+.text-muted   { color: var(--text-subdued) !important; }
+.border-bottom { border-color: var(--border) !important; }
+
+.form-control {
+    background-color: var(--bg-elevated) !important;
+    border: 1px solid var(--border) !important;
+    color: var(--text-base) !important;
+    border-radius: var(--radius-md);
+}
+
+.form-control:focus {
+    background-color: var(--bg-elevated) !important;
+    border-color: var(--accent) !important;
+    color: var(--text-base) !important;
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.18) !important;
+}
+
+.form-control::placeholder { color: var(--text-disabled) !important; }
+
+.alert-success {
+    background-color: rgba(29, 185, 84, 0.1) !important;
+    border-color: rgba(29, 185, 84, 0.25) !important;
+    color: var(--accent) !important;
+    border-radius: var(--radius-md) !important;
+}
+
+.alert-danger {
+    background-color: rgba(229, 57, 53, 0.1) !important;
+    border-color: rgba(229, 57, 53, 0.25) !important;
+    color: #ffb3b8 !important;
+    border-radius: var(--radius-md) !important;
+}
+
+h5, h6 { color: var(--text-base); }
+small   { color: var(--text-subdued); }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--bg-highlight); border-radius: 4px; }
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
+.btn-primary, .btn-save {
+    background-color: var(--accent) !important;
+    border-color: var(--accent) !important;
+    color: #000000 !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 700;
+    transition: all 0.2s ease;
+}
+
+.btn-primary:hover, .btn-save:hover {
+    background-color: var(--accent-hover) !important;
+    border-color: var(--accent-hover) !important;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 14px rgba(29, 185, 84, 0.35);
+}
+
+.btn-back {
+    color: var(--text-subdued);
+    background: transparent;
+    border: none;
+    padding: 7px 12px;
+    border-radius: var(--radius-md);
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    margin-bottom: 10px;
+    cursor: pointer;
+}
+
+.btn-back:hover {
+    background-color: var(--bg-elevated);
+    color: var(--text-base);
+}
+
+.btn-destructive {
+    background-color: rgba(229, 57, 53, 0.1) !important;
+    color: var(--danger) !important;
+    border: 1px solid rgba(229, 57, 53, 0.2) !important;
+    border-radius: var(--radius-md) !important;
+    font-weight: 600;
+    padding: 14px;
+    transition: all 0.2s;
+    width: 100%;
+    cursor: pointer;
+}
+
+.btn-destructive:hover {
+    background-color: var(--danger) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(229, 57, 53, 0.3);
+    transform: translateY(-1px);
+}
+
+/* ==========================================================================
+   CARDS
+   ========================================================================== */
+.card, .profile-card, .settings-container {
+    background: var(--bg-surface) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: var(--radius-lg) !important;
+    box-shadow: var(--shadow) !important;
+    color: var(--text-base);
+}
+
+.settings-card {
+    background: var(--bg-surface);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    border: 1px solid var(--border) !important;
+    box-shadow: var(--shadow);
+}
+
+.profile-card {
+    width: 100%;
+    max-width: 480px;
+    padding: 24px;
+    margin: 20px;
+}
+
+/* ==========================================================================
+   INPUTS (Settings form)
+   ========================================================================== */
+.elegant-input, .elegant-form-control {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 10px 15px;
+    font-size: 0.95rem;
+    color: var(--text-base);
+    transition: all 0.2s;
+    width: 100%;
+    outline: none;
+}
+
+.elegant-input:focus,
+.elegant-form-control:focus,
+.elegant-input:not([readonly]) {
+    background: var(--bg-elevated);
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(29, 185, 84, 0.15);
+}
+
+.elegant-input[readonly] {
+    background: transparent;
+    border-color: transparent;
+    padding-left: 0;
+    pointer-events: none;
+    color: var(--text-base);
+}
+
+/* ==========================================================================
+   AVATARS
+   ========================================================================== */
+.tg-avatar-wrapper {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    background-color: var(--bg-elevated);
+    border: 3px solid var(--bg-surface);
+}
+
+.avatar-readonly {
+    cursor: default !important;
+    pointer-events: none !important;
+}
+
+.tg-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.tg-avatar-wrapper:hover .tg-avatar-img { transform: scale(1.05); }
+
+.tg-avatar-letters {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 36px;
+    font-weight: 700;
+}
+
+.tg-avatar-overlay {
+    position: absolute;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    opacity: 0;
+    transition: opacity 0.3s;
+}
+
+.tg-avatar-wrapper:hover .tg-avatar-overlay { opacity: 1; }
+
+/* ==========================================================================
+   PENCIL BUTTON
+   ========================================================================== */
+.pencil-btn {
+    background: none;
+    border: none;
+    color: var(--text-disabled);
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 5px;
+    border-radius: 50%;
+    transition: all 0.2s;
+    cursor: pointer;
+    z-index: 5;
+}
+
+.pencil-btn:hover { color: var(--accent); background: rgba(29, 185, 84, 0.1); }
+.pencil-btn.active-editing { color: var(--accent); }
+
+/* ==========================================================================
+   SETTINGS / PROFILE WRAPPERS
+   ========================================================================== */
+.settings-wrapper, .profile-settings-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+    padding: 36px 20px;
+    background-color: var(--bg-base);
+    min-height: 100%;
+}
+
+.settings-container {
+    width: 100%;
+    max-width: 480px;
+    padding: 0;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+.settings-header {
+    background: var(--bg-surface);
+    padding: 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    margin-bottom: 15px;
+    border: 1px solid var(--border);
+}
+
+.section-item {
+    display: flex;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+}
+
+.section-item:last-child  { border-bottom: none; }
+.section-item:hover       { background-color: var(--bg-elevated); }
+
+.item-text span {
+    display: block;
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--text-base);
+}
+
+.item-text small {
+    color: var(--text-subdued);
+    font-size: 0.83rem;
+    margin-top: 2px;
+    display: block;
+}
+
+/* ==========================================================================
+   PROFILE HEADER CARD (Companion Profile)
+   ========================================================================== */
+.profile-header-card {
+    background: var(--bg-surface);
+    padding: 36px 20px 28px;
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border);
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.profile-header-card h2 {
+    margin: 0;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--text-base);
+}
+
+.profile-header-card .text-muted { font-size: 0.9rem; }
+
+/* ==========================================================================
+   SECURITY TOGGLE
+   ========================================================================== */
+.security-label {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: var(--text-base);
+    margin: 0;
+}
+
+.password-toggle-btn {
+    color: var(--accent) !important;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: none !important;
+    background: none;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    padding: 0;
+}
+
+.password-toggle-btn:hover { color: var(--accent-hover) !important; }
+
+/* ==========================================================================
+   MISC
+   ========================================================================== */
+.auth-alert {
+    background-color: rgba(229, 57, 53, 0.1);
+    border-left: 4px solid var(--danger);
+    color: #ffb3b8;
+    border-radius: var(--radius-md);
+}
+
+.phone-error {
+    display: none;
+    font-size: 0.85rem;
+    color: var(--danger);
+    margin-top: 4px;
+}
+
+.divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 12px 0;
+}

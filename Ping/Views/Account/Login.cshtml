@@ -1,0 +1,53 @@
+﻿@model Ping.Models.LoginViewModel
+
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Вхід - Ping</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/auth.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="px-3 w-100 d-flex justify-content-center">
+        <div class="auth-card">
+            <h2 class="text-center auth-title">Вхід</h2>
+
+            <form method="post">
+                <div class="auth-form-group mb-3">
+                    <label asp-for="Username">Логін</label>
+                    <input asp-for="Username" class="form-control auth-input" required placeholder="Введіть ваше ім'я"/>
+                    <span asp-validation-for="Username" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <div class="auth-form-group mb-4">
+                    <label asp-for="Password">Пароль</label>
+                    <input asp-for="Password" type="password" class="form-control auth-input" required placeholder="••••••••" />
+                    <span asp-validation-for="Password" class="text-danger small mt-1 d-block"></span>
+                </div>
+
+                <button type="submit" class="btn btn-neon-purple w-100 shadow-sm">Увійти</button>
+            </form>
+
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div class="auth-alert mt-4">
+                    <strong class="d-block mb-1">Помилка!</strong>
+                    <div asp-validation-summary="ModelOnly" class="small"></div>
+                </div>
+            }
+
+            <div class="mt-4 text-center">
+                <a asp-action="Register" class="auth-link">Немає акаунту? Реєстрація</a>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>

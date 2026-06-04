@@ -1,0 +1,196 @@
+﻿@using Microsoft.EntityFrameworkCore
+@using System.Security.Claims
+@inject Ping.Models.PingdbContext _context
+
+@{
+    var bodyContent = RenderBody();
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@ViewData["Title"] - Ping</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/components.css" asp-append-version="true" />
+</head>
+<body>
+
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="app-wrapper">
+            <aside class="sidebar">
+                <div class="search-container">
+                    <div class="dropdown">
+                        <button class="btn-settings" type="button" id="settingsMenu" data-bs-toggle="dropdown" aria-expanded="false">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="12" cy="12" r="3"></circle>
+                                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                            </svg>
+                        </button>
+                        <ul class="dropdown-menu shadow-sm" aria-labelledby="settingsMenu">
+                            <li><a class="dropdown-item" onclick="navigateTo('/Settings/Settings')">Настройки профиля</a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="/Account/Logout" onclick="return confirm('Вы действительно хотите выйти из аккаунта?');">Выйти</a></li>
+                        </ul>
+                    </div>
+
+                    <div class="search-wrapper position-relative">
+                        <i class="search-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <circle cx="11" cy="11" r="8"></circle>
+                                <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                            </svg>
+                        </i>
+                        <input type="text" id="chat-search" class="form-control" placeholder="Search" autocomplete="off">
+
+                        <ul id="search-results-dropdown" class="dropdown-menu w-100 shadow-sm" style="display:none; position:absolute; top:100%; left:0; z-index:1050; max-height:300px; overflow-y:auto; padding: 0;">
+                        </ul>
+                    </div>
+                </div>
+
+                <nav class="nav-column" id="chat-list">
+                    @{
+                        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                        int currentUserId = 0;
+                        int.TryParse(userIdClaim, out currentUserId);
+
+                        var chats = await _context.Chats
+                            .Include(c => c.FirstUserNavigation)
+                            .Include(c => c.SecondUserNavigation)
+                            .Include(c => c.Messages)
+                            .Where(c => c.FirstUser == currentUserId || c.SecondUser == currentUserId)
+                            .ToListAsync();
+
+                        var orderedChats = chats
+                            .OrderByDescending(c => c.Messages.Any()
+                                ? c.Messages.Max(m => m.CreatedAt)
+                                : DateTime.MinValue)
+                            .ToList();
+                    }
+
+                    @foreach (var chat in orderedChats)
+                    {
+                        var companion = chat.FirstUser == currentUserId
+                                        ? chat.SecondUserNavigation
+                                        : chat.FirstUserNavigation;
+
+                        var lastMessage = chat.Messages.OrderByDescending(m => m.CreatedAt).FirstOrDefault();
+                        var unreadCount = chat.Messages.Count(m => m.SenderId != currentUserId && !m.IsRead);
+
+                        string previewText = "Повідомлень немає";
+                        if (lastMessage != null)
+                        {
+                            var content = (lastMessage.Content ?? "").Trim();
+
+                            if (content.StartsWith("[voice]") || content.Contains("/uploads/voice/"))
+                                previewText = "Голосове повідомлення";
+                            else if (content.StartsWith("[image]"))
+                                previewText = "Зображення";
+                            else if (content.Contains(".gif") || content.Contains("giphy.com"))
+                                previewText = "GIF";
+                            else
+                                previewText = content;
+                        }
+
+                        <a class="nav-link-custom d-flex align-items-center"
+                           data-chat-id="@chat.Id"
+                           onclick="navigateTo('/Messages/Chat/@chat.Id', this)">
+
+                            <div class="avatar-circle me-3" style="overflow: hidden; display: flex; align-items: center; justify-content: center; flex-shrink: 0; width: 45px; height: 45px;">
+                                @if (companion != null && !string.IsNullOrEmpty(companion.AvatarPath))
+                                {
+                                    <img src="@companion.AvatarPath" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;" />
+                                }
+                                else
+                                {
+                                    @(companion?.Name?.Substring(0, 1).ToUpper() ?? "?")
+                                }
+                            </div>
+
+                            <div class="chat-info d-flex align-items-center justify-content-between w-100" style="min-width: 0;">
+                                <div style="min-width: 0; flex-grow: 1;">
+                                    <div class="chat-name text-truncate">
+                                        <strong>@(companion?.Name ?? "Видалений користувач")</strong>
+                                    </div>
+                                    <div class="chat-last-message text-muted text-truncate" id="last-msg-@chat.Id" style="font-size: 0.85rem;">
+                                        @previewText
+                                    </div>
+                                </div>
+
+                                <div id="unread-badge-@chat.Id"
+                                     class="text-white ms-2"
+                                     style="background-color: #766ac8; border-radius: 50%; min-width: 22px; height: 22px; font-size: 0.75rem; font-weight: bold; display: @(unreadCount > 0 ? "flex" : "none"); align-items: center; justify-content: center; flex-shrink: 0;">
+                                    @unreadCount
+                                </div>
+                            </div>
+                        </a>
+                    }
+                </nav>
+            </aside>
+
+            <main class="main-content">
+                <div id="dynamic-content">
+                    @bodyContent
+                </div>
+            </main>
+        </div>
+
+        <div id="tgMediaPicker" class="tg-media-picker">
+            <div class="tg-picker-tabs">
+                <button type="button" class="tg-tab-btn active" data-tab="tab-emojis">Эмодзи</button>
+                <button type="button" class="tg-tab-btn" data-tab="tab-gifs">GIF</button>
+            </div>
+            <div id="tab-emojis" class="tg-tab-content active" style="padding: 0 4px;">
+                <emoji-picker></emoji-picker>
+            </div>
+            <div id="tab-gifs" class="tg-tab-content">
+                <div class="tg-gif-search-wrapper">
+                    <input type="text" id="gif-search" class="form-control form-control-sm" placeholder="Пошук в GIPHY..." autocomplete="off">
+                </div>
+                <div id="gif-results" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px;"></div>
+            </div>
+        </div>
+
+        <div id="tgContextMenu" class="tg-context-menu">
+            <div class="quick-reactions">
+                <span class="quick-reaction" data-emoji="👍">👍</span>
+                <span class="quick-reaction" data-emoji="❤️">❤️</span>
+                <span class="quick-reaction" data-emoji="😂">😂</span>
+                <span class="quick-reaction" data-emoji="😮">😮</span>
+                <span class="quick-reaction" data-emoji="😢">😢</span>
+            </div>
+            <div id="menuCopy" class="tg-context-menu-item">Копіювати</div>
+            <div id="menuEdit" class="tg-context-menu-item">Редагувати</div>
+            <div id="menuDelete" class="tg-context-menu-item danger">Видалити</div>
+        </div>
+    }
+    else
+    {
+        <div class="container d-flex align-items-center justify-content-center" style="min-height: 100vh;">
+            <div class="card shadow p-4" style="width: 100%; max-width: 400px;">
+                @bodyContent
+            </div>
+        </div>
+    }
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@@twemoji/api@latest/dist/twemoji.min.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/intl-tel-input@21.0.7/build/js/intlTelInput.min.js"></script>
+    <script type="module" src="https://cdn.jsdelivr.net/npm/emoji-picker-element@1.21.3/index.js"></script>
+
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    <script src="~/js/voice.js" asp-append-version="true"></script>
+    <script src="~/js/image.js" asp-append-version="true"></script>
+    <script src="~/js/media-picker.js" asp-append-version="true"></script>
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+    <script src="~/js/phone-input.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

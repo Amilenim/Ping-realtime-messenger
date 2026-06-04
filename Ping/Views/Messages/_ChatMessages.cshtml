@@ -1,0 +1,165 @@
+@using System.Security.Claims
+@model List<Ping.Models.Message>
+@{
+    var chatId = ViewBag.CurrentChatId;
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+<input type="hidden" id="currentChatId" value="@chatId" />
+<input type="hidden" id="currentUserId" value="@currentUserId" />
+
+<div class="chat-window">
+
+    @{
+        string compName = ViewBag.CompanionName ?? "U";
+        int hash = 0;
+        foreach (char c in compName) { hash = c + ((hash << 5) - hash); }
+        int hue = Math.Abs(hash % 360);
+        string bgColor = $"hsl({hue}, 60%, 50%)";
+        string avatarPath = ViewBag.CompanionAvatarPath as string;
+    }
+
+    <div class="chat-header">
+        <div class="chat-header-user" onclick="navigateTo('/Messages/CompanionProfile?userId=@ViewBag.CompanionId&chatId=@chatId')">
+            <div class="chat-header-avatar" style="background-color: @(string.IsNullOrEmpty(avatarPath) ? bgColor : "transparent");">
+                @if (!string.IsNullOrEmpty(avatarPath))
+                {
+                    <img src="@avatarPath" class="chat-header-avatar-img" alt="avatar" />
+                }
+                else
+                {
+                    @ViewBag.CompanionFirstLetter
+                }
+            </div>
+            <div>
+                <h5 class="m-0 fw-bold">@ViewBag.CompanionName</h5>
+                <span class="companion-status" id="companion-status-@ViewBag.CompanionId">
+                    @if (ViewBag.IsOnline != null && (bool)ViewBag.IsOnline)
+                    {
+                        <span class="status-online">в мережі</span>
+                    }
+                    else
+                    {
+                        <span class="status-offline">не в мережі</span>
+                    }
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div id="messagesList" class="messages-list">
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var msg in Model)
+            {
+                bool isMine = msg.SenderId.ToString() == currentUserId;
+
+                <div class="message-bubble @(isMine ? "mine" : "theirs")"
+                     data-id="@msg.Id"
+                     data-time="@(((DateTimeOffset)DateTime.SpecifyKind(msg.CreatedAt, DateTimeKind.Utc)).ToUnixTimeMilliseconds())"
+                     data-mine="@isMine.ToString().ToLower()">
+
+                    <div class="text">
+                        @if (msg.Content.StartsWith("[voice]"))
+                        {
+                            var audioUrl = msg.Content.Replace("[voice]", "");
+                            <div class="voice-player" data-src="@audioUrl">
+                                <button class="voice-play-btn" type="button">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                                </button>
+                                <div class="voice-track">
+                                    <div class="voice-progress"></div>
+                                    <div class="voice-thumb" style="left:0;"></div>
+                                </div>
+                                <span class="voice-time">0:00</span>
+                                <audio src="@audioUrl" preload="metadata" style="display:none;"></audio>
+                            </div>
+                        }
+                        else if (msg.Content.StartsWith("[image]"))
+                        {
+                            var imgUrl = msg.Content.Substring(7);
+                            <img src="@imgUrl" alt="Зображення" class="msg-image" />
+                        }
+                        else if (msg.Content.StartsWith("http") && (msg.Content.Contains(".gif") || msg.Content.Contains("giphy.com")))
+                        {
+                            <img src="@msg.Content" alt="GIF" class="msg-gif" />
+                        }
+                        else
+                        {
+                            @msg.Content
+                        }
+                    </div>
+
+                    <div class="msg-footer">
+                        <small class="edited-label msg-meta" style="display: @(msg.IsEdited ? "inline" : "none");">изменено</small>
+                        <small class="time msg-meta">@msg.CreatedAt.ToLocalTime().ToString("HH:mm")</small>
+                        @if (isMine)
+                        {
+                            <span class="tg-ticks @(msg.IsRead ? "is-read" : "")">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check2-all" viewBox="0 0 16 16">
+                                    <path d="M12.354 4.354a.5.5 0 0 0-.708-.708L5 10.293 1.854 7.146a.5.5 0 1 0-.708.708l3.5 3.5a.5.5 0 0 0 .708 0zm-4.208 7-.896-.897.707-.707.543.543 6.646-6.647a.5.5 0 0 1 .708.708l-7 7a.5.5 0 0 1-.708 0" />
+                                    <path d="m5.354 7.146.896.897-.707.707-.897-.896a.5.5 0 1 1 .708-.708" />
+                                </svg>
+                            </span>
+                        }
+                    </div>
+
+                    @if (msg.MessageReactions != null && msg.MessageReactions.Any())
+                    {
+                        <div class="reactions-row" data-msg-id="@msg.Id">
+                            @foreach (var group in msg.MessageReactions.GroupBy(r => r.Emoji))
+                            {
+                                bool isMineReact = group.Any(r => r.UserId.ToString() == currentUserId);
+                                <span class="reaction-chip @(isMineReact ? "mine" : "")"
+                                      onclick="toggleReaction(@msg.Id, '@group.Key')">
+                                    @group.Key <span class="count">@group.Count()</span>
+                                </span>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        }
+        else
+        {
+            <div id="noMessages" class="no-messages-placeholder">Повідомлень поки немає. Надішліть першим!</div>
+        }
+    </div>
+
+    <div class="chat-input-wrapper">
+        <div id="editModeIndicator" class="edit-mode-indicator">
+            Редагування... <span id="cancelEditBtn">✕</span>
+        </div>
+
+        <div class="input-group">
+            <div id="recordingPanel" class="recording-panel">
+                <div class="record-dot"></div>
+                <span id="recordTimer">00:00</span>
+                <span id="cancelRecordBtn">Отмена</span>
+            </div>
+
+            <input type="file" id="imageInput" accept="image/*" style="display:none;">
+            <button type="button" id="imageBtn" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-image" viewBox="0 0 16 16">
+                    <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0" />
+                    <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z" />
+                </svg>
+            </button>
+
+            <input type="text" id="messageInput" class="form-control" placeholder="Написати повідомлення..." autocomplete="off">
+
+            <button class="btn" type="button" id="panel-toggle-btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-emoji-smile" viewBox="0 0 16 16">
+                    <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16" />
+                    <path d="M4.285 9.567a.5.5 0 0 1 .683.183A3.5 3.5 0 0 0 8 11.5a3.5 3.5 0 0 0 3.032-1.75.5.5 0 1 1 .866.5A4.5 4.5 0 0 1 8 12.5a4.5 4.5 0 0 1-3.898-2.25.5.5 0 0 1 .183-.683M7 6.5C7 7.328 6.552 8 6 8s-1-.672-1-1.5S5.448 5 6 5s1 .672 1 1.5m4 0c0 .828-.448 1.5-1 1.5s-1-.672-1-1.5S9.448 5 10 5s1 .672 1 1.5" />
+                </svg>
+            </button>
+
+            <button type="button" id="micBtn" class="btn">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-mic" viewBox="0 0 16 16">
+                    <path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5" />
+                    <path d="M10 8a2 2 0 1 1-4 0V3a2 2 0 1 1 4 0zM8 0a3 3 0 0 0-3 3v5a3 3 0 0 0 6 0V3a3 3 0 0 0-3-3" />
+                </svg>
+            </button>
+        </div>
+    </div>
+</div>

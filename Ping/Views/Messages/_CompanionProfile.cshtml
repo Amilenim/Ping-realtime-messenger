@@ -1,0 +1,76 @@
+﻿@model Ping.Models.User
+@using System.Security.Claims
+@{
+    var chatId = ViewBag.CurrentChatId ?? ViewBag.ChatId;
+    var currentUserId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+}
+
+<input type="hidden" id="currentChatId" value="@chatId" />
+<input type="hidden" id="currentUserId" value="@currentUserId" />
+
+<div class="settings-wrapper">
+    <div class="settings-container">
+
+        <div>
+            <button class="btn-back" onclick="navigateTo('/Messages/Chat/@chatId')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Назад
+            </button>
+        </div>
+
+        <div class="profile-header-card mb-4">
+            @{
+                string compName = Model.Name ?? "U";
+                string avatarPath = Model.AvatarPath;
+                string firstLetter = compName.Substring(0, 1).ToUpper();
+
+                int hash = 0;
+                foreach (char c in compName) { hash = c + ((hash << 5) - hash); }
+                int hue = Math.Abs(hash % 360);
+                string bgColor = $"hsl({hue}, 60%, 50%)";
+            }
+
+            <div class="tg-avatar-wrapper avatar-readonly">
+                @if (!string.IsNullOrEmpty(avatarPath))
+                {
+                    <img src="@avatarPath" alt="@compName" class="tg-avatar-img" />
+                }
+                else
+                {
+                    <div class="tg-avatar-letters" style="background-color: @bgColor;">
+                        @firstLetter
+                    </div>
+                }
+            </div>
+
+            <div class="profile-info">
+                <h2>@Model.Name</h2>
+            </div>
+        </div>
+
+        <div class="settings-card mb-4 border-0">
+            <div class="section-item">
+                <div class="item-text w-100">
+                    <span>@@@Model.Username</span>
+                    <small>Ім'я користувача</small>
+                </div>
+            </div>
+            <div class="section-item">
+                <div class="item-text w-100">
+                    <span>@Model.PhoneNumber</span>
+                    <small>Номер телефу</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-transparent shadow-none border-0">
+            <button class="btn-destructive w-100" onclick="deleteChat(@chatId)">
+                Видалити чат та історію
+            </button>
+        </div>
+
+    </div>
+</div>

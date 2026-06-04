@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Ping.Tests/Ping.Tests.csproj" Id="1eeaeee2-4d06-41f9-aa4f-bcdbd837deaa" />
+  <Project Path="Ping/Ping.csproj" />
+</Solution>
